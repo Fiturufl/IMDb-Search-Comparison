@@ -9,5 +9,6 @@ add_executable(IMDbSearchComparison
     src/main.cpp
     src/RedBlackTree.cpp
     src/DatasetLoader.cpp
+        include/MovieHashTable.h
 )
 target_include_directories(IMDbSearchComparison PRIVATE include)

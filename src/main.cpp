@@ -1,5 +1,6 @@
 #include "DatasetLoader.h"
 #include "RedBlackTree.h"
+#include "MovieHashTable.h"
 
 #include <chrono>
 #include <iostream>
@@ -71,6 +72,8 @@ int main() {
 
     std::cout << "Deletion time: " << deleteNs << " ns\n";
     std::cout << (removed ? "Deleted successfully\n" : "Deletion failed\n");
+
+    MovieHashTable::MovieHashTable table;
 
     return 0;
 }

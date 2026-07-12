@@ -2,7 +2,7 @@
 // Created by Lori on 7/11/26.
 //
 
-#pragma once
+#include "MovieHashTable.h"
 
 #include <string>
 #include <vector>
