@@ -24,8 +24,8 @@ class MovieHashTable {
     int capacity;
     MovieHashNode* table[800011];
 public:
-    MovieHashTable();
-    ~MovieHashTable();
+    //MovieHashTable();
+    //~MovieHashTable();
     void insertMovie(std::string& key, Movie* movie);
     Movie* searchMovie(std::string& key);
 };

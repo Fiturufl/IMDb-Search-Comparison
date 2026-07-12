@@ -73,7 +73,9 @@ int main() {
     std::cout << "Deletion time: " << deleteNs << " ns\n";
     std::cout << (removed ? "Deleted successfully\n" : "Deletion failed\n");
 
-    MovieHashTable::MovieHashTable table;
+    MovieHashTable table;
+
+    
 
     return 0;
 }
