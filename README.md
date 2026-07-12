@@ -31,3 +31,10 @@ The project uses:
 
 ## Building
 Instructions will be added as development progresses.
+
+## Dataset
+
+Download the following files from https://datasets.imdbws.com/ and place them in the `data/` folder:
+
+- title.basics.tsv
+- title.ratings.tsv
