@@ -9,12 +9,12 @@
 
 
 
-struct Movie {
+/*struct Movie {
     std::string id;
     std::string title;
     int year;
     float rating;
-};
+};*/ // Ambiguous; Francisco's code already defined it.
 
 struct MovieHashNode {
     std::string key;

@@ -5,12 +5,12 @@
 #pragma once
 #include <string>
 
-struct Movie {
+/*struct Movie {
     std::string id;
     std::string title;
     int year;
     float rating;
-};
+};*/
 
 struct MovieHashNode {
     std::string key;
