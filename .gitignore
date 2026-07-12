@@ -2,8 +2,8 @@
 .vscode/
 .DS_Store
 
+app.exe
+compile-errors.txt
 
 data/*
 !data/.gitkeep
-
-
