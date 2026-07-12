@@ -3,45 +3,11 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <unordered_map>
 
 std::vector<Movie> DatasetLoader::loadMovies(
-    const std::string& basicsFile,
-    const std::string& ratingsFile
+    const std::string& basicsFile
 ) {
-    std::unordered_map<std::string, float> ratings;
     std::vector<Movie> movies;
-
-    std::ifstream ratingsStream(ratingsFile);
-
-    if (!ratingsStream.is_open()) {
-        std::cerr << "Could not open ratings file: "
-                  << ratingsFile << '\n';
-        return movies;
-    }
-
-    std::string line;
-
-    // Skip ratings header.
-    std::getline(ratingsStream, line);
-
-    while (std::getline(ratingsStream, line)) {
-        std::stringstream stream(line);
-
-        std::string id;
-        std::string ratingText;
-        std::string voteCount;
-
-        std::getline(stream, id, '\t');
-        std::getline(stream, ratingText, '\t');
-        std::getline(stream, voteCount, '\t');
-
-        try {
-            ratings[id] = std::stof(ratingText);
-        } catch (...) {
-            // Skip malformed records.
-        }
-    }
 
     std::ifstream basicsStream(basicsFile);
 
@@ -51,7 +17,9 @@ std::vector<Movie> DatasetLoader::loadMovies(
         return movies;
     }
 
-    // Skip basics header.
+    std::string line;
+
+    // Skip the header row.
     std::getline(basicsStream, line);
 
     while (std::getline(basicsStream, line)) {
@@ -89,15 +57,12 @@ std::vector<Movie> DatasetLoader::loadMovies(
             continue;
         }
 
-        float rating = 0.0f;
-
-        auto ratingResult = ratings.find(id);
-
-        if (ratingResult != ratings.end()) {
-            rating = ratingResult->second;
-        }
-
-        movies.emplace_back(id, primaryTitle, year, rating);
+        movies.push_back({
+            id,
+            primaryTitle,
+            year,
+            0.0f
+        });
     }
 
     return movies;

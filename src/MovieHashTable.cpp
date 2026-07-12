@@ -1,106 +1,138 @@
-//
-// Created by Lori on 7/11/26.
-//
+#include "MovieHashTable.h"
 
-#pragma once
+#include <functional>
 
-#include <string>
-#include <vector>
+MovieHashTable::Node::Node(
+    const std::string& key,
+    const Movie& movie
+) : key(key), movie(movie), next(nullptr) {}
 
+MovieHashTable::MovieHashTable(std::size_t capacity)
+    : capacity(capacity),
+      movieCount(0),
+      table(capacity, nullptr) {}
 
+MovieHashTable::~MovieHashTable() {
+    clear();
+}
 
-struct Movie {
-    std::string id;
-    std::string title;
-    int year;
-    float rating;
-};
+// Isolate the identifying part of the ID
+// (the numbers in tt0076759) and use as the hash.
+std::size_t MovieHashTable::hashFunction(
+    const std::string& key
+) const {
+    try {
+        unsigned long long numericId =
+            std::stoull(key.substr(2));
 
-struct MovieHashNode {
-    std::string key;
-    Movie* moviePtr;
-    MovieHashNode* next;
-
-    MovieHashNode(std::string  k, Movie* m) : key(k), moviePtr(m), next(nullptr) {}
-};
-
-class MovieHashTable {
-    int capacity = 800011;
-    // We use a prime for our hash table's size for safety.
-
-    MovieHashNode* table[800011] = {nullptr};
-    // We don't even need to use a load factor either in this Hash Table, because
-    // we know how large our data is going to be before we begin.
-
-    // Isolate the identifying part of the ID (the numbers in tt0076759) and use as the hash.
-    int hashFunction(std::string& key) {
-        int numericId = std::stoi(key.substr(2));
         return numericId % capacity;
+    } catch (...) {
+        return std::hash<std::string>{}(key) % capacity;
+    }
+}
+
+// Insert a movie using its ID for the key
+bool MovieHashTable::insert(const Movie& movie) {
+    std::size_t index = hashFunction(movie.id);
+    Node* ptr = table[index];
+    Node* prev = nullptr;
+
+    if (ptr == nullptr) {
+        table[index] = new Node(movie.id, movie);
+        movieCount++;
+        return true;
+    }
+    // This is our base case, if the block was empty.
+
+    while (ptr != nullptr) {
+        if (ptr->key == movie.id) {
+            return false;
+        }
+
+        prev = ptr;
+        ptr = ptr->next;
     }
 
-public:
-    // Resizing function is currently unnecessary, because we know the size of the data.
+    prev->next = new Node(movie.id, movie);
+    movieCount++;
 
-    // Insert a movie using its ID for the key and its pointer for the value
-    void insertMovie(std::string& key, Movie* movie) {
-        int index = hashFunction(key);
-        MovieHashNode* newNode = new MovieHashNode(key, movie);
+    return true;
+}
 
-        MovieHashNode* ptr = table[index];
-        MovieHashNode* prev = nullptr;
+// Lookup: Returns either the movie pointer or a nullptr
+Movie* MovieHashTable::search(const std::string& id) {
+    std::size_t index = hashFunction(id);
+    Node* ptr = table[index];
 
-        if (ptr == nullptr) {
-            table[index] = newNode;
-            return;
+    while (ptr != nullptr) {
+        if (ptr->key == id) {
+            return &ptr->movie;
         }
-        // This is our base case, if the block waas empty
 
-        while (ptr != nullptr) {
-            if (ptr->key == key) {
-                newNode->next = ptr->next;
-                if (prev != nullptr) prev->next = newNode;
-                else table[index] = newNode;
+        ptr = ptr->next;
+    }
+
+    return nullptr;
+}
+
+const Movie* MovieHashTable::search(
+    const std::string& id
+) const {
+    std::size_t index = hashFunction(id);
+    Node* ptr = table[index];
+
+    while (ptr != nullptr) {
+        if (ptr->key == id) {
+            return &ptr->movie;
+        }
+
+        ptr = ptr->next;
+    }
+
+    return nullptr;
+}
+
+// Deletion: Returns true if successful, false if the item did not exist
+bool MovieHashTable::remove(const std::string& id) {
+    std::size_t index = hashFunction(id);
+    Node* ptr = table[index];
+    Node* prev = nullptr;
+
+    // The code here is similar to that of the search,
+    // with a prev ptr added in.
+    while (ptr != nullptr) {
+        if (ptr->key == id) {
+            if (prev != nullptr) {
+                prev->next = ptr->next;
+            } else {
+                table[index] = ptr->next;
             }
-            ptr = ptr->next;
-            prev = ptr;
+
+            delete ptr;
+            movieCount--;
+
+            return true;
+        }
+
+        prev = ptr;
+        ptr = ptr->next;
+    }
+
+    return false;
+}
+
+std::size_t MovieHashTable::size() const {
+    return movieCount;
+}
+
+void MovieHashTable::clear() {
+    for (Node*& head : table) {
+        while (head != nullptr) {
+            Node* temp = head;
+            head = head->next;
+            delete temp;
         }
     }
 
-    // Lookup: Returns either the movie pointer or a nullptr
-    Movie* searchMovie(std::string& key) {
-        int index = hashFunction(key);
-        MovieHashNode* ptr = table[index];
-
-        while (ptr != nullptr) {
-            if (ptr->key == key) {
-                return ptr->moviePtr;
-            }
-            ptr = ptr->next;
-        }
-
-        return nullptr;
-    }
-
-    // Deletion: Returns true if successful, false if the item did not exist
-    bool deleteMovie(std::string& key) {
-        int index = hashFunction(key);
-        MovieHashNode* ptr = table[index];
-        MovieHashNode* prev = nullptr;
-        // the code here is similar to that of the search, with a prev ptr added in
-
-        while (ptr != nullptr) {
-            if (ptr->key == key) {
-                if (prev != nullptr) prev->next = ptr->next;
-                else table[index] = ptr->next;
-                delete ptr;
-                // Just freeing up my MovieHashNode. NOT the Movie itself, which the other tree needs.
-                return true;
-            }
-            prev = ptr;
-            ptr = ptr->next;
-        }
-
-        return false;
-
-    }
-};
+    movieCount = 0;
+}
